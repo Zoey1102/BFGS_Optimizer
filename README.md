@@ -18,4 +18,4 @@ A better method using only first derivatives is to combine gradient information 
 
 The way to build up the approximation is to insist that at each optimization step, the quadratic model implied by the approximate Hessian must be made to match the gradient evaluated at the start and the end of the step. 
 
-This project is just the implementation of the most common BFGS22 version of the algorithm. It updates the inverse approximate Hessian, thereby avoiding the need for a matrix solve.
+This project is just the implementation of the most common BFGS version of the algorithm. It updates the inverse approximate Hessian, thereby avoiding the need for a matrix solve.
