@@ -1,6 +1,8 @@
 # BFGS_Optimizer
 R function bfgs( ) implementing the BFGS quasi-Newton minimization method
+
 Course name: MATH11176 Statistical Programming, University of Edinburgh
+
 Group member: Zheyi SHEN, Chang LU, Hongxuan ZHU
 
 
