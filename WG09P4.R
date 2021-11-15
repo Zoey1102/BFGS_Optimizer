@@ -5,7 +5,7 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
   fn <- function(theta) f(theta,...)
   m = 1
   hep = 1e-07
-  gr = rep(0.0000000,length(theta))
+  gr = rep(0,length(theta))
   bk = diag(length(theta))
   while(m <= maxit){
     for(i in 1:length(theta)){
