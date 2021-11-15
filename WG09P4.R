@@ -2,12 +2,18 @@
 # https://github.com/Zoey1102/BFGS_Optimizer
 
 bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
+  # accept the arguments and return the function value
   fn <- function(theta) f(theta,...)
+  # initiate the number of iterations
   m = 1
+  # set a tiny value 'hep' for figuring gradient
   hep = 1e-07
+  # set an empty vector 'gr' to store the gradient value
   gr = rep(0,length(theta))
+  # set a diagonal matrix as the initial approximate Hessian matrix
   bk = diag(length(theta))
   while(m <= maxit){
+    # calculate gradient value
     for(i in 1:length(theta)){
       pos = rep(0,length(theta))
       pos[i] = 1
@@ -15,8 +21,11 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
       theta_substract = theta - pos*hep
       gr[i] = (fn(theta_add) - fn(theta_substract))/(2 * hep)
     }
+    # when the gradient value meet the request, loop end
     if(sum(abs(gr)) < tol) break
+    # when fail to meet the request, figure out the step size 'a'
     else{
+      # figure out update direction 'dk'
       dk = -gr %*% solve(bk)
       a = 10
       lameda = 0.8
@@ -26,7 +35,9 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
         if(fn(theta + a*dk)<fn(theta) + a * c * gr %*% t(dk)) b = FALSE
         else a = a * lameda
       }
+      # renew theta
       theta_new = theta + a * dk
+      # renew the approximate Hessian matrix
       sk = theta_new - theta_new
       gr_new = rep(0,length(theta))
       for(i in 1:length(theta)){
@@ -46,5 +57,7 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
     }
     m = m +1
   }
-  theta
+  f = fn(theta)
+  gr = gr_new
+  list(f = f,theta = theta,iter = m,g = gr,h = bk)
 }
