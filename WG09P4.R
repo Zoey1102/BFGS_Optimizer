@@ -1,20 +1,27 @@
 # Group_09, Chang LU, Hongxuan ZHU, Zheyi SHEN
 # https://github.com/Zoey1102/BFGS_Optimizer
 
-bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
-  # accept the arguments and return the function value
-  fn <- function(theta) f(theta,...)
-  # initiate the number of iterations
-  m = 1
-  # set a tiny value 'hep' for figuring gradient
-  hep = 1e-07
-  # set an empty vector 'gr' to store the gradient value
-  g = rep(0,length(theta))
-  # set a diagonal matrix as the initial approximate Hessian matrix
-  bk = diag(length(theta))
-  while(m <= maxit){
+## Practical 4 Group 9 ####
+## This practical is aimed to write a R function, bfgs, implementing the BFGS quasi-Newton minimization method.
+
+bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
+  " theta: vector of initial optimization parameters
+        f: objective function to minimize
+      tol: convergence tolerance
+   fscale: estimate of f at the optimum
+    maxit: maximum number of iterations 
+   return: a list of value at th minimum, including
+           - objective function, parameters, iterations, gradients, approximate Hessian matrix"
+  
+  fn <- function(theta) f(theta,...) ## return the function value
+  m = 1 ## number of iterations
+  hep = 1e-07 ## a tiny value for calculating gradient
+  g = rep(0,length(theta)) ## empty vector to store the gradient value
+  bk = diag(length(theta)) ## initialize approximate Hessian matrix as a diagonal matrix
+  
+  while (m <= maxit) {
     # calculate gradient value
-    for(i in 1:length(theta)){
+    for (i in 1:length(theta)) {
       pos = rep(0,length(theta))
       pos[i] = 1
       theta_add = theta + pos*hep
@@ -22,25 +29,25 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
       g[i] = (fn(theta_add) - fn(theta_substract))/(2 * hep)
     }
     # when the gradient value meet the request, loop end
-    if(sum(abs(g)) < tol) break
+    if (sum(abs(g)) < tol) break
     # when fail to meet the request, figure out the step size 'a'
-    else{
+    else {
       # figure out update direction 'dk'
       dk = -g %*% solve(bk)
       a = 10
       lameda = 0.8
       c = 0.5
       b = TRUE
-      while(b){
-        if(fn(theta + a*dk)<fn(theta) + a * c * g %*% t(dk)) b = FALSE
-        else a = a * lameda
+      while (b) {
+        if (fn(theta + a*dk) < fn(theta) + a*c*g %*% t(dk)) b = FALSE
+        else a = a*lameda
       }
       # renew theta
-      theta_new = theta + a * dk
+      theta_new = theta + a*dk
       # renew the approximate Hessian matrix
       sk = theta_new - theta_new
       g_new = rep(0,length(theta))
-      for(i in 1:length(theta)){
+      for (i in 1:length(theta)) {
         pos = rep(0,length(theta))
         pos[i] = 1
         theta_add = theta_new + pos*hep
@@ -48,14 +55,15 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100){
         g_new[i] = (fn(theta_add) - fn(theta_substract))/(2 * hep)
       }
       yk = g_new - g
-      if(yk %*% t(sk) > 0){
-        bk = bk - (bk %*% t(sk) %*% sk %*% bk)/(sk %*% bk %*% t(sk)) +
+      if (yk %*% t(sk) > 0) {
+        bk = bk - 
+          (bk %*% t(sk) %*% sk %*% bk)/(sk %*% bk %*% t(sk)) +
           (t(yk) %*% yk)/(yk %*% t(sk))
       }
       else bk = bk
       theta = theta_new
     }
-    m = m +1
+    m = m+1 ## count iterations
   }
   f = fn(theta)
   g = g_new
