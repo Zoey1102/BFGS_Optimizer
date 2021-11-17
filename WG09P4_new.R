@@ -4,6 +4,17 @@
 ## Practical 4 Group 9 ####
 ## This practical is aimed to write a R function, bfgs, implementing the BFGS quasi-Newton minimization method.
 
+fdg <- function(theta,f,...) {
+  p <- length(theta); g <- rep(0,p) ## empty vector to store the gradient value
+  eps <- 1e-7
+  for (i in 1:p) {
+    th_add <- th_sub <- theta
+    th_add[i] <- th_add[i] + eps; th_sub[i] <- th_sub[i] - eps
+    g[i] <- (f(th_add,...)-f(th_sub,...))/(2*eps)
+  }
+  g
+}
+
 bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
   " theta: vector of initial optimization parameters
         f: objective function to minimize
@@ -12,41 +23,32 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
     maxit: maximum number of iterations 
    return: a list of value at th minimum, including
            - objective function, parameters, iterations, gradients, approximate Hessian matrix"
-  f <- f(theta,...) ## return the function value
+  f0 <- f(theta,...) ## return the function value
   p <- length(theta)
   B <- diag(p) ## initialize approximate Hessian matrix as a diagonal matrix
   c2 <- 0.9; maxit.s <- 20
   
-  fdg <- function(theta,f,...) {
-    g <- rep(0,p) ## empty vector to store the gradient value
-    eps <- 1e-7
-    for (i in 1:p) {
-      pos = rep(0,length(theta)); pos[i] = 1
-      theta_add <- theta + pos*eps
-      theta_substract <- theta - pos*eps
-      g[i] <- (f(theta_add)-f(theta_substract))/(2*esp)
-    }
-  }
-  
   for (i in 1:maxit) {
-    g0 <- fdg(theta,f,...)
-    if (max(abs(g0))<(abs(f)+fscale)*tol) break
-    s <- -bk %*% g0
+    g <- fdg(theta,f,...)
+    if (max(abs(g))<(abs(f0)+fscale)*tol) break
+    s <- -B %*% g
     for (k in 1:maxit.s) {
-      if (t(fdg(theta+s,f,...))*s>=c2*t(g0)*s) {
-        theta <- theta+s
-        f <- f(theta+s)
-        g <- fdg(theta+s)
-        y <- g-g0
-        ro <- 1/(t(s)*y)
-        B <- (I(p)-ro*s%*%t(y))%*%B%*%(I(p)-ro*s%*%t(y))+ro*s*t(s)
+      theta1 <- theta+s
+      g1 <- fdg(theta1,f,...)
+      if (t(g1)%*%s>=c2*t(g)%*%s) {
+        y <- g1-g
+        ro <- as.double(solve(t(s)%*%y))
+        B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*s%*%t(y))+ro*s%*%t(s)
+        theta <- theta1
+        f <- f(theta1,...)
+        g <- g1
       } else s <- s/2
     }
-    if (k==max.half) {
+    if (k==maxit.s) {
       warning("function not a normal convergence")
       break
     }
   }
   if (i==maxit) warning("iteration limit reached")
-  list(f=f,theta=theta,iter=i,g=g,H=H)
+  list(f=f,theta=theta,iter=i,g=g,H=B)
 }
