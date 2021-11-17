@@ -37,11 +37,10 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
       g1 <- fdg(theta1,f,...)
       if (t(g1)%*%s>=c2*t(g)%*%s) {
         y <- g1-g
-        ro <- as.double(solve(t(s)%*%y))
+        ro <- as.numeric(solve(t(s)%*%y))
         B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*s%*%t(y))+ro*s%*%t(s)
         theta <- theta1
-        f <- f(theta1,...)
-        g <- g1
+        f1 <- f(theta1,...)
       } else s <- s/2
     }
     if (k==maxit.s) {
@@ -50,5 +49,5 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
     }
   }
   if (i==maxit) warning("iteration limit reached")
-  list(f=f,theta=theta,iter=i,g=g,H=B)
+  list(f=f1,theta=theta,iter=i,g=g1,H=B)
 }
