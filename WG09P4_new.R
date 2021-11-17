@@ -39,7 +39,7 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
       if (f1<=f0+c1*g0%*%s & g1%*%s>=c2*g0%*%s) {
         y <- g1-g0
         ro <- as.numeric(solve(t(s)%*%y))
-        B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*s%*%t(y))+ro*s%*%t(s)
+        B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*y%*%t(s))+ro*s%*%t(s)
         theta <- theta1
         H <- 0.5*(t(B)+B)
         break
