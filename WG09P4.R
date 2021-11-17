@@ -13,16 +13,11 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
    return: a list of value at th minimum, including
            - objective function, parameters, iterations, gradients, approximate Hessian matrix"
   
-  # accept the arguments and return the function value
-  fn <- function(theta) f(theta,...)
-  # initiate the number of iterations
-  m = 1
-  # set a tiny value 'hep' for figuring gradient
-  hep = 1e-07
-  # set an empty vector 'gr' to store the gradient value
-  gr = rep(0,length(theta))
-  # set a diagonal matrix as the initial approximate Hessian matrix
-  bk = diag(length(theta))
+  fn <- function(theta) f(theta,...) ## return the function value
+  m = 1 ## number of iterations
+  hep = 1e-07 ## a tiny value for calculating gradient
+  gr = rep(0,length(theta)) ## empty vector to store the gradient value
+  bk = diag(length(theta)) ## initialize approximate Hessian matrix as a diagonal matrix
   while(m <= maxit){
     # calculate gradient value
     for(i in 1:length(theta)){
@@ -32,7 +27,7 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
       theta_substract = theta - pos*hep
       gr[i] = (fn(theta_add) - fn(theta_substract))/(2 * hep)
     }
-    # when fail to meet the request, figure out the step size 'a'
+    # figure out the step size 'a'
     dk = -gr %*% solve(bk)
     a = 10
     lameda = 0.8
