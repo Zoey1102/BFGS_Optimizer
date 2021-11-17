@@ -41,6 +41,7 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
         B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*s%*%t(y))+ro*s%*%t(s)
         theta <- theta1
         f1 <- f(theta1,...)
+        H <- 0.5*(t(B)+B)
         break
       } else s <- s/2
     }
@@ -50,5 +51,5 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
     }
   }
   if (i==maxit) warning("iteration limit reached")
-  list(f=f1,theta=theta,iter=i,g=g1,H=B)
+  list(f=f1,theta=theta,iter=i,g=g1,H=H)
 }
