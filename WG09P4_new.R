@@ -23,24 +23,24 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
     maxit: maximum number of iterations 
    return: a list of value at th minimum, including
            - objective function, parameters, iterations, gradients, approximate Hessian matrix"
-  f0 <- f(theta,...) ## return the function value
   p <- length(theta)
   B <- diag(p) ## initialize approximate Hessian matrix as a diagonal matrix
-  c2 <- 0.9; maxit.s <- 20
+  c1 <- 0.01; c2 <- 0.9; maxit.s <- 20
   
   for (i in 1:maxit) {
-    g <- fdg(theta,f,...)
-    if (max(abs(g))<(abs(f0)+fscale)*tol) break
-    s <- -B %*% g
+    g0 <- fdg(theta,f,...)
+    f0 <- f(theta,...) ## return the function value
+    if (max(abs(g0))<(abs(f0)+fscale)*tol) break
+    s <- -B %*% g0
     for (k in 1:maxit.s) {
       theta1 <- theta+s
       g1 <- fdg(theta1,f,...)
-      if (t(g1)%*%s>=c2*t(g)%*%s) {
-        y <- g1-g
+      f1 <- f(theta1,...)
+      if (f1<=f0+c1*g0%*%s & g1%*%s>=c2*g0%*%s) {
+        y <- g1-g0
         ro <- as.numeric(solve(t(s)%*%y))
         B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*s%*%t(y))+ro*s%*%t(s)
         theta <- theta1
-        f1 <- f(theta1,...)
         H <- 0.5*(t(B)+B)
         break
       } else s <- s/2
