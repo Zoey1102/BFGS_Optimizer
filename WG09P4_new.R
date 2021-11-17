@@ -41,6 +41,7 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
         B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*s%*%t(y))+ro*s%*%t(s)
         theta <- theta1
         f1 <- f(theta1,...)
+        break
       } else s <- s/2
     }
     if (k==maxit.s) {
