@@ -24,8 +24,7 @@ fdg <- function(theta,f,...) {
         g = attr(f(theta,...),"gradient") # Extract the gradient as it's available
     }
     g   ## Return the gradient
-}
-
+}## end of the fdg()function
 
 
 ## 2. The BFGS quasi-Newton optimizer
@@ -43,7 +42,7 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
     if (is.infinite(f0)) stop("infinite objective at the initial theta")
 
     ## Bail out if any derivatives are infinite at initial theta
-    g0 <- fdg(theta,f,...)   
+    g0 <- fdg(theta,f,...)   ## Call fdg() to get the gradient
     if (sum(is.infinite(g0))) stop("infinite derivatives at the initial theta")
     
     ## Step trials   
@@ -67,24 +66,26 @@ bfgs <- function(theta,f,...,tol=1e-5,fscale=1,maxit=100) {
             g1 <- fdg(theta1,f,...) ## ... compute the resulting gradients
             f1 <- f(theta1,...)     ## ... and the resulting objective value
             
-            ## Check Wolfe(1): if it's an improve/decrease on objectives
-            if (f1>=f0+c1*g0%*%s ) s <- s/2
-            else if (g1%*%s<=c2*g0%*%s) s <- 1.1*s
-            else {
-              y <- g1-g0    ## ... then compute the B matrix
+            ## Check Wolfe(1): it's an improve/decrease on objectives
+            if (f1>=f0+c1*g0%*%s ) s <- s/2   ## if f is not reduced, halve the step
+            ## Check Wolfe(2): guarantee matrix B is positive definite
+            else if (g1%*%s<=c2*g0%*%s) s <- 1.1*s  ## ... or increase it by 10% if Wolfe(2) is not satisfied
+            
+            else {  ## ... or compute the B matrix
+              y <- g1-g0    
               ro <- 1/as.numeric((t(s)%*%y))
               B <- (diag(p)-ro*s%*%t(y))%*%B%*%(diag(p)-ro*y%*%t(s))+ro*s%*%t(s)
               theta <- theta1     ## update the theta for next iteration
               H <- 0.5*(t(B)+B)   ## compute the approximate Hessian
               break
-            }  ## halve the proposed step to reduce f
-        }   ## end of the halve step loop
+            }  
+        }   
         if (k==maxit.s) {  ## If however "small" a step cannot reduce the objective function f, 
             warning("function not a normal convergence") ## ... report that the convergence criteria not met
             break
         }
-    }   ## end of the halve step loop
+    }## end of the halve step loop
 
-    if (i==maxit) warning("iteration limit reached")
+    if (i==maxit) warning("iteration limit reached without convergence")
     list(f=f1,theta=theta,iter=i,g=g1,H=H)
 }
